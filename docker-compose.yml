@@ -55,6 +55,10 @@ services:
       - POSTGRES_DB=rinha
     ports:
       - "5432:5432"
+    volumes:
+      - ./confs/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./confs/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c config_file=/etc/postgresql/postgresql.conf
     deploy:
       resources:
         limits:
@@ -62,9 +66,9 @@ services:
           memory: "140MB"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d rinha" ]
-      interval: 3s
-      timeout: 1s
-      retries: 2
+      interval: 4s
+      timeout: 2s
+      retries: 5
 
 networks:
   default:
