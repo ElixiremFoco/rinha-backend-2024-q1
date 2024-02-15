@@ -16,6 +16,8 @@ if config_env() == :prod do
     url: database_url,
     pool_size: 10
 
+  config :rinha, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
+
   secret_key_base =
     System.get_env("SECRET_KEY_BASE") ||
       raise """

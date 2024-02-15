@@ -6,8 +6,10 @@ services:
     hostname: api01
     environment:
       - PHX_HOST=api01
-      - SECRET_KEY_BASE="HScbRLB0u8vOQAMWLC2DFHdrpnMKcGEs"
+      - SECRET_KEY_BASE=HScbRLB0u8vOQAMWLC2DFHdrpnMKcGEs
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/rinha
+      - IP_V4_ADDRESS=192.0.1.11
+      - IP_NODE=192.0.1.12
     
     ports:
       - "4000:4000"
@@ -19,6 +21,9 @@ services:
         limits:
           cpus: "0.6"
           memory: "200MB"
+    networks:
+      erlcluster:
+        ipv4_address: 192.0.1.11
 
   api02:
     <<: *api 
@@ -26,10 +31,15 @@ services:
     environment:
       - PORT=4001
       - PHX_HOST=api02
-      - SECRET_KEY_BASE="ZufWuBc1xg3ssETNHHB14bZ1PKM1mruC"
+      - SECRET_KEY_BASE=ZufWuBc1xg3ssETNHHB14bZ1PKM1mruC
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/rinha
+      - IP_V4_ADDRESS=192.0.1.12
+      - IP_NODE=192.0.1.11
     ports:
       - "4001:4001"
+    networks:
+      erlcluster:
+        ipv4_address: 192.0.1.12
  
   nginx:
     image: nginx:latest
@@ -45,6 +55,9 @@ services:
         limits:
           cpus: "0.17"
           memory: "10MB"
+    networks:
+      erlcluster:
+        ipv4_address: 192.0.1.13
 
   db:
     image: postgres:latest
@@ -69,9 +82,14 @@ services:
       interval: 4s
       timeout: 2s
       retries: 5
+    networks:
+      erlcluster:
+        ipv4_address: 192.0.1.14
 
 networks:
-  default:
+  erlcluster:
     driver: bridge
-    name: rinha-nginx-2024q1
-
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.0.1.0/24"

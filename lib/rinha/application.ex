@@ -7,7 +7,20 @@ defmodule Rinha.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [Rinha.Repo, RinhaWeb.Endpoint]
+    children =
+      [
+        Rinha.Repo,
+        {Task, fn -> Node.connect(:"rinha@#{node_ip()}") end},
+        RinhaWeb.Endpoint
+      ] ++
+        if(master_node?(), do: [Rinha.Producer], else: [])
+
+    # ++
+    # [
+    #   Supervisor.child_spec(Rinha.Consumer, id: :consumer_1),
+    #   Supervisor.child_spec(Rinha.Consumer, id: :consumer_2),
+    #   Supervisor.child_spec(Rinha.Consumer, id: :consumer_3)
+    # ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -22,4 +35,8 @@ defmodule Rinha.Application do
     RinhaWeb.Endpoint.config_change(changed, removed)
     :ok
   end
+
+  defp host_ip, do: System.fetch_env!("IP_V4_ADDRESS")
+  defp node_ip, do: System.fetch_env!("IP_NODE")
+  defp master_node?, do: String.ends_with?(host_ip(), "11")
 end
