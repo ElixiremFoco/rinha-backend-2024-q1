@@ -4,9 +4,8 @@ defmodule Rinha.Balance do
 
   schema "balances" do
     field(:amount, :integer)
-    field(:account_id, :id)
 
-    timestamps(type: :utc_datetime)
+    belongs_to :account, Rinha.Account
   end
 
   @doc false

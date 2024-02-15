@@ -6,7 +6,7 @@ defmodule Rinha.Account do
     field(:limit_amount, :integer)
     field(:name, :string)
 
-    timestamps(type: :utc_datetime)
+    has_one :balance, Rinha.Balance
   end
 
   @doc false
