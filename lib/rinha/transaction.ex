@@ -12,7 +12,7 @@ defmodule Rinha.Transaction do
           amount: integer,
           date: DateTime.t(),
           description: String.t(),
-          transaction_type: :credit | :debit,
+          transaction_type: :c | :d,
           account_id: integer
         }
 
@@ -20,7 +20,7 @@ defmodule Rinha.Transaction do
     field :amount, :integer
     field :date, :utc_datetime
     field :description, :string
-    field :transaction_type, Ecto.Enum, values: [:credit, :debit]
+    field :transaction_type, Ecto.Enum, values: [:c, :d]
 
     belongs_to :account, Rinha.Account
   end

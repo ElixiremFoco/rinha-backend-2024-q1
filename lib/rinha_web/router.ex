@@ -10,7 +10,7 @@ defmodule RinhaWeb.Router do
 
     scope "/clientes/:id" do
       post "/transacoes", TransactionController, :transact
-      post "/extrato", TransactionController, :statement
+      get "/extrato", TransactionController, :statement
     end
 
     scope "/healthcheck", log: false do

@@ -82,11 +82,11 @@ jobs:
     - name: Run Dialyzer
       run: mix dialyzer --no-check --halt-exit-status
 
-    - name: Reset Ecto
-      run: mix ecto.reset
-
     - name: Run Tests
       run: mix test
+      env:
+        POSTGRES_USER: postgres
+        POSTGRES_PASS: postgres
 
     - name: Run Linter
       run: |

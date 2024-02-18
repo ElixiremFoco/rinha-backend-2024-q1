@@ -1,4 +1,10 @@
 defmodule Rinha.TransactionValidator do
+  @moduledoc """
+  Módulo que valida se uma transação é válida e pode ser processada
+  ou não com base no saldo atual de uma conta e seu respectivo
+  limite de crédito.
+  """
+
   alias Rinha.Account
   alias Rinha.Balance
   alias Rinha.Transaction
@@ -8,10 +14,14 @@ defmodule Rinha.TransactionValidator do
 
   # caso seja um débito
   def run(%Account{balance: %Balance{} = balance} = acc, %Transaction{} = trx) do
-    if balance.amount - trx.amount < -acc.limit_amount do
-      {:error, :insuficcient_limit_amount}
-    else
+    if has_sufficient_limit?(acc, balance, trx) do
       :ok
+    else
+      {:error, :insuficcient_limit_amount}
     end
+  end
+
+  defp has_sufficient_limit?(acc, balance, trx) do
+    balance.amount - trx.amount < -acc.limit_amount
   end
 end

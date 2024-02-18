@@ -49,8 +49,8 @@ defmodule Rinha do
   end
 
   @spec operation_by_trx_type(Transaction.t()) :: (integer, integer -> integer)
-  defp operation_by_trx_type(%Transaction{transaction_type: :credit}), do: &(&1 + &2)
-  defp operation_by_trx_type(%Transaction{transaction_type: :debit}), do: &(&1 - &2)
+  defp operation_by_trx_type(%Transaction{transaction_type: :c}), do: &(&1 + &2)
+  defp operation_by_trx_type(%Transaction{transaction_type: :d}), do: &(&1 - &2)
 
   @doc """
   Função principal do sistema, reponsável por processar uma transação.
@@ -83,10 +83,29 @@ defmodule Rinha do
     end)
     |> then(fn
       {:ok, {account, balance}} ->
-        {:ok, TransactionAdapter.to_external(account, balance)}
+        {:ok, TransactionAdapter.to_response(account, balance)}
 
       {:error, reason} ->
         {:error, reason}
     end)
+  end
+
+  @spec generate_statement(Account.t(), limit: integer | nil) :: map
+  def generate_statement(%Account{} = acc, opts \\ []) do
+    limit = Keyword.get(opts, :limit, 10)
+    issue_date = NaiveDateTime.utc_now()
+    transactions = fetch_last_transactions(acc, limit: limit)
+    TransactionAdapter.to_statement(acc, acc.balance, transactions, issue_date)
+  end
+
+  defp fetch_last_transactions(%Account{} = acc, limit: limit) do
+    import Ecto.Query, only: [from: 2]
+
+    Repo.all(
+      from t in Transaction,
+        where: t.account_id == ^acc.id,
+        limit: ^limit,
+        order_by: {:desc, t.date}
+    )
   end
 end

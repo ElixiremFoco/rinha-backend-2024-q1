@@ -1,4 +1,6 @@
 defmodule Rinha.Producer do
+  @moduledoc false
+
   use GenStage
 
   @name {:global, __MODULE__}
