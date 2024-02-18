@@ -1,14 +1,28 @@
 defmodule Rinha.Transaction do
+  @moduledoc """
+  Representa a estrutura interna de uma transação, que
+  mapeia a tabela do banco de dados.
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{
+          amount: integer,
+          date: DateTime.t(),
+          description: String.t(),
+          transaction_type: :credit | :debit,
+          account_id: integer
+        }
+
   schema "transactions" do
-    field(:amount, :integer)
-    field(:date, :utc_datetime)
-    field(:description, :string)
-    field(:transaction_type, Ecto.Enum, values: [:c, :d])
-    field(:account_id, :id)
+    field :amount, :integer
+    field :date, :utc_datetime
+    field :description, :string
+    field :transaction_type, Ecto.Enum, values: [:credit, :debit]
+
+    belongs_to :account, Rinha.Account
   end
 
   @doc false

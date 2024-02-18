@@ -1,14 +1,25 @@
 defmodule Rinha.InputTransaction do
+  @moduledoc """
+  Representa a estrutura de uma transação recebida pela API.
+  """
+
   use Ecto.Schema
 
   import Ecto.Changeset
+
+  @type t :: %__MODULE__{
+          valor: integer,
+          descricao: String.t(),
+          account_id: integer,
+          tipo: :c | :d
+        }
 
   @primary_key false
   embedded_schema do
     field(:valor, :integer)
     field(:descricao, :string)
     field(:tipo, Ecto.Enum, values: [:c, :d])
-    field(:account_id, :id)
+    field(:account_id, :integer)
   end
 
   @doc false
