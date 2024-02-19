@@ -7,10 +7,17 @@ defmodule Rinha.Application do
 
   @impl true
   def start(_type, _args) do
+    topologies = [
+      example: [
+        strategy: Cluster.Strategy.Epmd,
+        config: [hosts: [:"rinha@#{host_ip()}", :"rinha@#{node_ip()}"]],
+      ]
+    ]
+
     children =
       [
         Rinha.Repo,
-        {Task, fn -> Node.connect(:"rinha@#{node_ip()}") end},
+        {Cluster.Supervisor, [topologies, [name: Rinha.ClusterSupervisor]]},
         RinhaWeb.Endpoint
       ] ++
         if(master_node?(), do: [Rinha.Producer], else: [])
