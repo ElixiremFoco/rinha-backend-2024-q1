@@ -41,7 +41,8 @@ defmodule Rinha.MixProject do
       {:gen_stage, "~> 1.0"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:libcluster, "~> 3.3"}
+      {:libcluster, "~> 3.3"},
+      {:horde, "~> 0.9.0"}
     ]
   end
 

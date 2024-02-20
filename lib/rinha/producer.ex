@@ -3,16 +3,23 @@ defmodule Rinha.Producer do
 
   use GenStage
 
-  @name {:global, __MODULE__}
+  require Logger
 
   ## Public API
 
   def start_link(_opts) do
-    GenStage.start_link(__MODULE__, :ok, name: @name)
+    case GenStage.start_link(__MODULE__, :ok, name: via_tuple(__MODULE__)) do
+      {:ok, pid} ->
+        {:ok, pid}
+
+      {:error, {:already_started, pid}} ->
+        Logger.info("already started at #{inspect(pid)}, returning :ignore")
+        :ignore
+    end
   end
 
   def enqueue(event) do
-    GenStage.cast(@name, {:notify, event})
+    GenStage.cast(via_tuple(__MODULE__), {:notify, event})
   end
 
   ## Callbacks
@@ -46,4 +53,6 @@ defmodule Rinha.Producer do
         {:noreply, Enum.reverse(events), {queue, demand}}
     end
   end
+
+  def via_tuple(name), do: {:via, Horde.Registry, {Rinha.Registry, name}}
 end
