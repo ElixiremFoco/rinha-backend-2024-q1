@@ -4,11 +4,11 @@ defmodule RinhaWeb.TransactionController do
   action_fallback Rinha.FallbackController
 
   def transact(conn, payload) do
-    :ok = Rinha.Producer.enqueue(payload)
-
-    conn
-    |> put_status(:ok)
-    |> json("")
+    with {:ok, transaction} <- Rinha.transact(payload) do
+      conn
+      |> put_status(:ok)
+      |> json(transaction)
+    end
   end
 
   def statement(conn, %{"id" => account_id}) do

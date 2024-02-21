@@ -26,7 +26,7 @@ defmodule Rinha.Producer do
 
   @impl true
   def init(:ok) do
-    {:producer, {:queue.new(), 0}, dispatcher: GenStage.BroadcastDispatcher}
+    {:producer, {:queue.new(), 0}}
   end
 
   @impl true

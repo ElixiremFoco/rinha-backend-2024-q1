@@ -17,12 +17,12 @@ defmodule Rinha.Application do
     children =
       [
         Rinha.Repo,
-        {Horde.Registry, [name: Rinha.Registry, keys: :unique, members: registry_members()]},
-        {Horde.DynamicSupervisor,
-         name: Rinha.HordeSupervisor, strategy: :one_for_one, members: supervisor_members()},
-        {Cluster.Supervisor, [topologies, [name: Rinha.ClusterSupervisor]]},
-        RinhaWeb.Endpoint,
-        connector_child_spec()
+        # {Horde.Registry, [name: Rinha.Registry, keys: :unique, members: registry_members()]},
+        # {Horde.DynamicSupervisor,
+        # name: Rinha.HordeSupervisor, strategy: :one_for_one, members: supervisor_members()},
+        # {Cluster.Supervisor, [topologies, [name: Rinha.ClusterSupervisor]]},
+        RinhaWeb.Endpoint
+        # connector_child_spec()
       ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -22,6 +22,6 @@ defmodule Rinha.TransactionValidator do
   end
 
   defp has_sufficient_limit?(acc, balance, trx) do
-    balance.amount - trx.amount < -acc.limit_amount
+    not (balance.amount - trx.amount < -acc.limit_amount)
   end
 end

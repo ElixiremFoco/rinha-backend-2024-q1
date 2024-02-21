@@ -11,7 +11,7 @@ config :rinha, Rinha.Repo,
   pool_size: 10
 
 config :rinha, RinhaWeb.Endpoint,
-  http: [ip: {0, 0, 0, 0}, port: 4000],
+  http: [ip: {0, 0, 0, 0}, port: 9999],
   check_origin: false,
   code_reloader: true,
   debug_errors: true,

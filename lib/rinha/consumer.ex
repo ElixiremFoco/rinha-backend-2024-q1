@@ -24,7 +24,8 @@ defmodule Rinha.Consumer do
   @impl true
   def handle_events(events, _from, state) do
     for event <- events do
-      IO.inspect({self(), event})
+      {:ok, _} = Rinha.transact(event)
+      # IO.inspect({self(), event})
     end
 
     {:noreply, [], state}
