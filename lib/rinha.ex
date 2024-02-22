@@ -5,8 +5,9 @@ defmodule Rinha do
   transações.
   """
 
-  alias Rinha.Account
-  alias Rinha.Balance
+  import Ecto.Query
+
+  alias Rinha.Customer
   alias Rinha.InputTransaction
   alias Rinha.Transaction
   alias Rinha.TransactionAdapter
@@ -18,39 +19,20 @@ defmodule Rinha do
   Busca um conta a partir de seu ID. Retorna uma tupla
   de `:ok` com a conta encontrada ou `:error` caso ela não exista.
   """
-  @spec fetch_account(integer) :: {:ok, Account.t()} | {:error, :not_found}
-  def fetch_account(account_id) do
-    import Ecto.Query
-    query = from a in Account, where: a.id == ^account_id, preload: [:balance]
+  @spec fetch_customer(integer) :: {:ok, Customer.t()} | {:error, :not_found}
+  def fetch_customer(customer_id) do
+    query = from a in Customer, where: a.id == ^customer_id
 
-    if account = Repo.one(query) do
-      {:ok, account}
+    if customer = Repo.one(query) do
+      {:ok, customer}
     else
       {:error, :not_found}
     end
   end
 
-  @doc """
-  Atualiza o saldo de uma conta baseado na transação mais recente
-  a ser processada. Se for uma transação de crédito, aumentos o saldo
-  ou diminuimos caso seja uma transação de débito.
-
-  Retorna uma tupla de `:ok` em caso de sucesso ou uma tupla de `:error`
-  caso a atualização no banco falhe por algum motivo.
-  """
-  @spec update_balance(Balance.t(), Transaction.t()) ::
-          {:ok, Balance.t()} | {:error, Ecto.Changeset.t()}
-  def update_balance(%Balance{} = balance, %Transaction{} = trx) do
-    operation = operation_by_trx_type(trx)
-
-    balance
-    |> Balance.changeset(%{amount: operation.(balance.amount, trx.amount)})
-    |> Repo.update()
-  end
-
-  @spec operation_by_trx_type(Transaction.t()) :: (integer, integer -> integer)
-  defp operation_by_trx_type(%Transaction{transaction_type: :c}), do: &(&1 + &2)
-  defp operation_by_trx_type(%Transaction{transaction_type: :d}), do: &(&1 - &2)
+  @spec increment_balance(integer, Transaction.t()) :: integer
+  defp increment_balance(balance, %Transaction{type: :c, value: value}), do: balance + value
+  defp increment_balance(balance, %Transaction{type: :d, value: value}), do: balance + -value
 
   @doc """
   Função principal do sistema, reponsável por processar uma transação.
@@ -68,44 +50,47 @@ defmodule Rinha do
   ```
   """
   @spec transact(map) :: {:ok, map} | {:error, :not_found | Ecto.Changeset.t()}
-  def transact(%{"id" => account_id} = payload) do
+  def transact(%{"id" => customer_id} = payload) do
     Repo.transaction(fn ->
-      with {:ok, account} <- fetch_account(account_id),
+      with {:ok, customer} <- fetch_customer(customer_id),
            {:ok, external} <- InputTransaction.parse(payload),
-           {:ok, internal} <- TransactionAdapter.to_internal(external, account.id),
-           :ok <- TransactionValidator.run(account, internal) do
+           {:ok, internal} <- TransactionAdapter.to_internal(external, customer.id),
+           :ok <- TransactionValidator.run(customer, internal) do
         Repo.insert!(internal)
-        {:ok, balance} = update_balance(account.balance, internal)
-        {account, balance}
+        new_balance = increment_balance(customer.balance, internal)
+
+        customer
+        |> Customer.changeset(%{balance: new_balance})
+        |> Repo.update!()
       else
         {:error, err} -> Repo.rollback(err)
       end
     end)
     |> then(fn
-      {:ok, {account, balance}} ->
-        {:ok, TransactionAdapter.to_response(account, balance)}
+      {:ok, customer} ->
+        {:ok, TransactionAdapter.to_response(customer)}
 
       {:error, reason} ->
-        {:error, reason}
+        {:error, reason} |> IO.inspect()
     end)
   end
 
-  @spec generate_statement(Account.t(), limit: integer | nil) :: map
-  def generate_statement(%Account{} = acc, opts \\ []) do
+  @spec generate_statement(Customer.t(), limit: integer | nil) :: map
+  def generate_statement(%Customer{} = customer, opts \\ []) do
     limit = Keyword.get(opts, :limit, 10)
     issue_date = NaiveDateTime.utc_now()
-    transactions = fetch_last_transactions(acc, limit: limit)
-    TransactionAdapter.to_statement(acc, acc.balance, transactions, issue_date)
+    transactions = fetch_last_transactions(customer, limit: limit)
+    TransactionAdapter.to_statement(customer, transactions, issue_date)
   end
 
-  defp fetch_last_transactions(%Account{} = acc, limit: limit) do
+  defp fetch_last_transactions(%Customer{} = customer, limit: limit) do
     import Ecto.Query, only: [from: 2]
 
     Repo.all(
       from t in Transaction,
-        where: t.account_id == ^acc.id,
+        where: t.customer_id == ^customer.id,
         limit: ^limit,
-        order_by: {:desc, t.date}
+        order_by: {:desc, t.created_at}
     )
   end
 end
