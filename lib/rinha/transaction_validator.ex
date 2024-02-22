@@ -5,23 +5,22 @@ defmodule Rinha.TransactionValidator do
   limite de crédito.
   """
 
-  alias Rinha.Account
-  alias Rinha.Balance
+  alias Rinha.Customer
   alias Rinha.Transaction
 
   # caso seja um crédito
-  def run(_account, %Transaction{transaction_type: :c}), do: :ok
+  def run(_customer, %Transaction{type: :c}), do: :ok
 
   # caso seja um débito
-  def run(%Account{balance: %Balance{} = balance} = acc, %Transaction{} = trx) do
-    if has_sufficient_limit?(acc, balance, trx) do
+  def run(%Customer{} = customer, %Transaction{} = trx) do
+    if has_sufficient_limit?(customer, trx) do
       :ok
     else
       {:error, :insuficcient_limit_amount}
     end
   end
 
-  defp has_sufficient_limit?(acc, balance, trx) do
-    not (balance.amount - trx.amount < -acc.limit_amount)
+  defp has_sufficient_limit?(customer, trx) do
+    not (customer.balance - trx.value < -customer.max_limit)
   end
 end

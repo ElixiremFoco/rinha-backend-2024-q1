@@ -1,4 +1,4 @@
-defmodule Rinha.Account do
+defmodule Rinha.Customer do
   @moduledoc """
   Representação interna de uma conta, que mapeia com a tabela do banco de dados.
   """
@@ -7,24 +7,24 @@ defmodule Rinha.Account do
   import Ecto.Changeset
 
   @type t :: %__MODULE__{
-          limit_amount: integer,
+          max_limit: integer,
           name: String.t(),
-          balance: Rinha.Balance.t(),
+          balance: integer,
           transactions: list(Rinha.Transaction.t())
         }
 
-  schema "accounts" do
-    field :limit_amount, :integer
+  schema "customers" do
+    field :max_limit, :integer
     field :name, :string
+    field :balance, :integer, default: 0
 
-    has_one :balance, Rinha.Balance
     has_many :transactions, Rinha.Transaction
   end
 
   @doc false
-  def changeset(account, attrs) do
-    account
-    |> cast(attrs, [:name, :limit_amount])
-    |> validate_required([:name, :limit_amount])
+  def changeset(customer, attrs) do
+    customer
+    |> cast(attrs, [:name, :max_limit, :balance])
+    |> validate_required([:name, :max_limit, :balance])
   end
 end

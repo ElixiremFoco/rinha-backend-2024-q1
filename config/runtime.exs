@@ -14,7 +14,7 @@ if config_env() == :prod do
 
   config :rinha, Rinha.Repo,
     url: database_url,
-    pool_size: 10
+    pool_size: 15
 
   config :rinha, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 

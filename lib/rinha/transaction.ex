@@ -9,28 +9,28 @@ defmodule Rinha.Transaction do
   import Ecto.Changeset
 
   @type t :: %__MODULE__{
-          amount: integer,
-          date: DateTime.t(),
+          value: integer,
+          created_at: DateTime.t(),
           description: String.t(),
-          transaction_type: :c | :d,
-          account_id: integer
+          type: :c | :d,
+          customer_id: integer
         }
 
   schema "transactions" do
-    field :amount, :integer
-    field :date, :utc_datetime
+    field :value, :integer
+    field :created_at, :utc_datetime
     field :description, :string
-    field :transaction_type, Ecto.Enum, values: [:c, :d]
+    field :type, Ecto.Enum, values: [:c, :d]
 
-    belongs_to :account, Rinha.Account
+    belongs_to :customer, Rinha.Customer
   end
 
   @doc false
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:amount, :description, :transaction_type, :account_id])
-    |> validate_required([:amount, :description, :transaction_type])
-    |> foreign_key_constraint(:account_id)
+    |> cast(attrs, [:value, :description, :type, :customer_id])
+    |> validate_required([:value, :description, :type])
+    |> foreign_key_constraint(:customer_id)
   end
 
   def parse(trx \\ %__MODULE__{}, attrs) do

@@ -10,7 +10,7 @@ defmodule Rinha.InputTransaction do
   @type t :: %__MODULE__{
           valor: integer,
           descricao: String.t(),
-          account_id: integer,
+          customer_id: integer,
           tipo: :c | :d
         }
 
@@ -19,7 +19,7 @@ defmodule Rinha.InputTransaction do
     field(:valor, :integer)
     field(:descricao, :string)
     field(:tipo, Ecto.Enum, values: [:c, :d])
-    field(:account_id, :integer)
+    field(:customer_id, :integer)
   end
 
   @doc false
