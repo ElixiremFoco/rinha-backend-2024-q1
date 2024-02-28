@@ -17,6 +17,8 @@ defmodule Rinha.Application do
     children =
       [
         Rinha.Repo,
+        # Commanded application
+        Rinha.CMD.Application,
         # {Horde.Registry, [name: Rinha.Registry, keys: :unique, members: registry_members()]},
         # {Horde.DynamicSupervisor,
         # name: Rinha.HordeSupervisor, strategy: :one_for_one, members: supervisor_members()},

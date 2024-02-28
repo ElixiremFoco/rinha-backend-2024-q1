@@ -5,6 +5,13 @@ CREATE TABLE customers (
 	balance INTEGER CHECK (balance >= -max_limit) NOT NULL
 );
 
+CREATE TABLE projection_versions (
+	projection_name TEXT PRIMARY KEY,
+	last_seen_event_number BIGINT,
+	inserted_at TIMESTAMP DEFAULT now() NOT NULL,
+	updated_at TIMESTAMP DEFAULT now() NOT NULL
+);
+
 CREATE TABLE transactions(
   id SERIAL PRIMARY KEY,
   value INTEGER NOT NULL,
