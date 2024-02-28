@@ -10,6 +10,15 @@ config :rinha, Rinha.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+config :rinha, Rinha.EventStore,
+  username: System.get_env("POSTGRES_USER", "postgres"),
+  password: System.get_env("POSTGRES_PASS", "postgres"),
+  hostname: "localhost",
+  database: "rinha_eventstore_dev",
+  stacktrace: true,
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
 config :rinha, RinhaWeb.Endpoint,
   http: [ip: {0, 0, 0, 0}, port: 9999],
   check_origin: false,

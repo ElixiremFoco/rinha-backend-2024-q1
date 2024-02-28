@@ -2,6 +2,7 @@ import Config
 
 config :rinha,
   ecto_repos: [Rinha.Repo],
+  event_stores: [Rinha.EventStore],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
