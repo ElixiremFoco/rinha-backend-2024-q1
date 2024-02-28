@@ -42,7 +42,11 @@ defmodule Rinha.MixProject do
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:libcluster, "~> 3.3"},
-      {:horde, "~> 0.9.0"}
+      {:horde, "~> 0.9.0"},
+      {:commanded, "~> 1.4"},
+      {:eventstore, "~> 1.4"},
+      {:commanded_eventstore_adapter, "~> 1.4"},
+      {:commanded_ecto_projections, "~> 1.4"},
     ]
   end
 
