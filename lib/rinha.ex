@@ -13,6 +13,8 @@ defmodule Rinha do
   alias Rinha.TransactionAdapter
   alias Rinha.TransactionValidator
 
+  alias Rinha.CustomerLimits
+
   alias Rinha.Repo
 
   @doc """
@@ -81,6 +83,18 @@ defmodule Rinha do
     issue_date = NaiveDateTime.utc_now()
     transactions = fetch_last_transactions(customer, limit: limit)
     TransactionAdapter.to_statement(customer, transactions, issue_date)
+  end
+
+  alias Rinha.CMD.Application, as: CMD
+
+  def transact2(%{"id" => customer_id} = payload) do
+    with {:ok, limit} <- CustomerLimits.get(customer_id),
+         {:ok, command} <- InputTransaction.parse(payload, limit),
+         :ok <- CMD.dispatch(command, consistency: :strong) do
+      {:ok, customer_id}
+    else
+      error_cmd -> error_cmd |> IO.inspect()
+    end
   end
 
   defp fetch_last_transactions(%Customer{} = customer, limit: limit) do

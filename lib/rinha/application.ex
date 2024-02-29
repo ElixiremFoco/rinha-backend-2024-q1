@@ -17,6 +17,7 @@ defmodule Rinha.Application do
     children =
       [
         Rinha.Repo,
+        Rinha.CustomerLimits,
         # Commanded application
         Rinha.CMD.Application,
         # {Horde.Registry, [name: Rinha.Registry, keys: :unique, members: registry_members()]},

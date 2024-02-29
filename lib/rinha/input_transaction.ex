@@ -23,10 +23,38 @@ defmodule Rinha.InputTransaction do
   end
 
   @doc false
-  def parse(transaction \\ %__MODULE__{}, attrs) do
+  def parse(transaction \\ %__MODULE__{}, %{"id" => customer_id} = attrs) do
     transaction
     |> cast(attrs, [:valor, :descricao, :tipo])
-    |> validate_required([:valor, :descricao, :tipo])
+    |> put_change(:customer_id, customer_id)
+    |> validate_required([:valor, :descricao, :tipo, :customer_id])
     |> apply_action(:parse)
+  end
+
+  def parse(%{"id" => customer_id} = attrs, limit) do
+    %__MODULE__{}
+    |> cast(attrs, [:valor, :descricao, :tipo])
+    |> put_change(:customer_id, customer_id)
+    |> validate_required([:valor, :descricao, :tipo, :customer_id])
+    |> validate_transaction(limit)
+    |> apply_action(:parse)
+  end
+
+  defp validate_transaction(%{valid?: false} = changeset, _limit), do: changeset
+
+  defp validate_transaction(changeset, limit) do
+    valor = get_change(changeset, :valor)
+    tipo = get_change(changeset, :tipo)
+
+    case tipo do
+      :d ->
+        if valor > limit do
+          add_error(changeset, :valor, "cannot be greater than #{limit}")
+        else
+          changeset
+        end
+      _ ->
+        changeset
+    end
   end
 end
